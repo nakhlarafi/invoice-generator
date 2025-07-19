@@ -202,7 +202,7 @@ export default function InvoiceForm() {
           />
           <input
             type="text"
-            placeholder="Name of Voltage"
+            placeholder="Name of Bolgate"
             value={row.voltage}
             onChange={(e) => handleRowChange(idx, "voltage", e.target.value)}
             style={{ margin: 5 }}
