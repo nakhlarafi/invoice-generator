@@ -53,11 +53,11 @@ export default function InvoiceForm() {
     const doc = new jsPDF();
     
     // Header Section
-    doc.setFontSize(16);
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.text("Bismillahir Rahmanir Rahim", 105, 15, { align: "center" });
     doc.setFontSize(20);
-    doc.text("M/S DOLPHIN CAREER ENTERPRISE", 105, 25, { align: "center" });
+    doc.text("M/S DOLPHIN CARRIER ENTERPRISE", 105, 25, { align: "center" });
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text("Proprietor: MD IQBAL HOSSAIN (JIBON)", 105, 32, { align: "center" });
@@ -68,14 +68,44 @@ export default function InvoiceForm() {
     // Header Info from the form
     doc.setFontSize(11);
     let y = 65;
-    doc.text(`To: ${header.to}`, 14, y);
-    doc.text(`Through: ${header.through}`, 14, y + 7);
-    doc.text(`Post: ${header.post}`, 14, y + 14);
-    doc.text(`Side: ${header.side}`, 14, y + 21);
-    doc.text(`Address: ${header.address1}`, 14, y + 28);
-    doc.text(`${header.address2}`, 14, y + 35);
-    doc.text(`P.O No: ${header.poNumber}`, 14, y + 42);
-    doc.text(`Bill No - ${header.billNumber}`, 14, y + 49);
+    doc.setFont("helvetica", "bold");
+    doc.text("To:", 14, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${header.to}`, 35, y);
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("Through:", 14, y + 7);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${header.through}`, 35, y + 7);
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("Post:", 14, y + 14);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${header.post}`, 35, y + 14);
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("Side:", 14, y + 21);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${header.side}`, 35, y + 21);
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("Address:", 14, y + 28);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${header.address1}`, 35, y + 28);
+    
+    doc.text(`${header.address2}`, 35, y + 35); // No label here
+    
+    doc.setFont("helvetica", "bold");
+    doc.text("P.O No:", 14, y + 42);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${header.poNumber}`, 35, y + 42);
+    // doc.text(`Bill No - ${header.billNumber}`, 14, y + 49);
+    // Bill No in the center just above the table
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Bill No: ${header.billNumber}`, 105, y + 55, { align: "center" });
+
+
 
     // Draw horizontal line right after mobile info
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -100,7 +130,7 @@ export default function InvoiceForm() {
           "SL",
           "Date",
           "Challan",
-          "Name of Voltage",
+          "Name of Bolgate",
           "Quantity (cft)",
           "Rate (Tk)",
           "Amount (Tk)",
@@ -108,36 +138,63 @@ export default function InvoiceForm() {
         ],
       ],
       body: tableRows,
-      startY: y + 60,
-      styles: { fontSize: 10, textColor: 0 },
-      headStyles: { fillColor: [240, 240, 240], textColor: 0 },
+      startY: y + 65,
+      styles: {
+        fontSize: 10,
+        textColor: 0,
+        lineColor: 0,
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255], // white background
+        textColor: 0,               // black text
+        lineColor: 0,               // black border lines
+        lineWidth: 0.1,
+        fontStyle: 'bold',
+      },
       theme: "grid",
     });
+    
 
-    // Totals and Extra Info
     const finalY = doc.lastAutoTable.finalY + 10;
+    const lineSpacing = 7;
+// Line 1: "Total:" (bold)
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text(`Total:`, 14, finalY);
-    doc.text(`Quantity (cft) = ${totalQuantity} cft`, 30, finalY);
-    doc.text(`Amount = ${totalAmount} Tk`, 100, finalY);
+    doc.text("Total:", 14, finalY);
 
-    doc.setFontSize(11);
+    // Line 2: Quantity (label normal, value bold)
     doc.setFont("helvetica", "normal");
+    doc.text("Quantity (cft) =", 14, finalY + lineSpacing);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${totalQuantity} cft`, 45, finalY + lineSpacing);  // adjust X if needed
+
+    // Line 3: Amount (label normal, value bold)
+    doc.setFont("helvetica", "normal");
+    doc.text("Amount =", 14, finalY + lineSpacing * 2);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${totalAmount} Tk`, 45, finalY + lineSpacing * 2);  // adjust X if needed
+
+    
+    // Line 4: In Words
+    doc.setFontSize(11);
     doc.text(
-      `In Words: ${toWords(Math.floor(totalAmount))} Taka Only`,
+      [`In Words: ${toWords(Math.floor(totalAmount))} Taka Only`],
       14,
-      finalY + 10
+      finalY + lineSpacing * 3,
+      { maxWidth: pageWidth - 28 } // leave 14 margin on both sides
     );
 
-    // Proprietor Signature area in the bottom right corner
-    const sigY = finalY + 30;
+    
+    // Signature
+    const sigY = finalY + lineSpacing * 5; // give enough space from "In Words"
     doc.setLineWidth(0.5);
-    doc.line(pageWidth - 70, sigY, pageWidth - 14, sigY);
+    doc.line(pageWidth - 70, sigY, pageWidth - 14, sigY); // signature line
     doc.setFontSize(10);
     doc.text("Proprietor Signature", pageWidth - 14, sigY + 5, {
       align: "right",
     });
+    
 
     // Place NB note at the very bottom left corner in very small text
     const pageHeight = doc.internal.pageSize.getHeight();
