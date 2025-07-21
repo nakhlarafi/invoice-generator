@@ -231,7 +231,7 @@ export default function InvoiceForm() {
         Invoice Generator
       </h2>
 
-      <h3>Header Info</h3>
+      {/* <h3>Header Info</h3> */}
       {Object.entries(header).map(([key, value]) => {
         const storageKey = `history-${key}`;
         const history = JSON.parse(localStorage.getItem(storageKey)) || [];

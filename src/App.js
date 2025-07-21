@@ -6,8 +6,8 @@ function App() {
   return (
     <div className="App">
        {/* call invoice.js here */}
-      <h1>Invoice Generator</h1>
-      <p>Use the form below to generate an invoice PDF.</p>
+      {/* <h1>Invoice Generator</h1> */}
+      {/* <p>Use the form below to generate an invoice PDF.</p> */}
       <InvoiceForm/>
     </div>
   );
