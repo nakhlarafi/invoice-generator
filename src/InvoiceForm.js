@@ -3,6 +3,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toWords } from "number-to-words";
 
+
 export default function InvoiceForm() {
   const pdfRef = useRef(null);
 
@@ -27,6 +28,12 @@ export default function InvoiceForm() {
       remark: "",
     },
   ]);
+  const removeRow = (index) => {
+    if (index === 0) return; // Do not remove the first/default row
+    const updatedRows = [...rows];
+    updatedRows.splice(index, 1);
+    setRows(updatedRows);
+  };
 
   const handleRowChange = (index, field, value) => {
     const updated = [...rows];
@@ -225,16 +232,58 @@ export default function InvoiceForm() {
       </h2>
 
       <h3>Header Info</h3>
-      {Object.entries(header).map(([key, value]) => (
-        <input
-          key={key}
-          type="text"
-          placeholder={key.replace(/([A-Z])/g, " $1")}
-          value={value}
-          onChange={(e) => setHeader({ ...header, [key]: e.target.value })}
-          style={{ display: "block", margin: "10px 0", width: "100%" }}
-        />
-      ))}
+      {Object.entries(header).map(([key, value]) => {
+        const storageKey = `history-${key}`;
+        const history = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+        const handleBlur = () => {
+          const trimmed = value.trim();
+          if (trimmed && !history.includes(trimmed)) {
+            const updated = [trimmed, ...history].slice(0, 10); // max 10 entries
+            localStorage.setItem(storageKey, JSON.stringify(updated));
+          }
+        };
+
+        return (
+          <div key={key} style={{ marginBottom: "10px" }}>
+            <input
+              list={storageKey}
+              type="text"
+              placeholder={key.replace(/([A-Z])/g, " $1")}
+              value={value}
+              onChange={(e) => setHeader((prev) => ({ ...prev, [key]: e.target.value }))}
+              onBlur={handleBlur}
+              style={{ width: "100%", padding: "8px" }}
+            />
+            <datalist id={storageKey}>
+              {history.map((opt, i) => (
+                <option key={i} value={opt} />
+              ))}
+            </datalist>
+          </div>
+        );
+      })}
+
+    <button
+      onClick={() => {
+        Object.keys(header).forEach((key) => localStorage.removeItem(`history-${key}`));
+        alert("All input histories have been cleared.");
+      }}
+      style={{
+        marginTop: 20,
+        backgroundColor: "#d32f2f",
+        color: "white",
+        padding: "10px 20px",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
+    >
+      Clear All Input History
+    </button>
+
+
+
 
       <h3>Invoice Rows</h3>
       {rows.map((row, idx) => (
@@ -292,10 +341,19 @@ export default function InvoiceForm() {
             onChange={(e) => handleRowChange(idx, "remark", e.target.value)}
             style={{ margin: 5 }}
           />
-          <div>
-            <strong>Amount: {(row.quantity * row.rate).toFixed(2)} Tk</strong>
-          </div>
-        </div>
+         <div>
+      <strong>Amount: {(row.quantity * row.rate).toFixed(2)} Tk</strong>
+      </div>
+
+        {idx !== 0 && (
+          <button
+            onClick={() => removeRow(idx)}
+            style={{ marginTop: 5, backgroundColor: "#f44336", color: "white", padding: "5px 10px", border: "none", borderRadius: 4 }}
+          >
+            Remove
+          </button>
+        )}
+      </div>
       ))}
 
       <button
