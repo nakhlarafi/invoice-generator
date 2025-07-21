@@ -23,8 +23,8 @@ export default function InvoiceForm() {
       date: "",
       challan: "",
       voltage: "",
-      quantity: 0,
-      rate: 0,
+      quantity: "",
+      rate: "",
       remark: "",
     },
   ]);
@@ -38,23 +38,32 @@ export default function InvoiceForm() {
   const handleRowChange = (index, field, value) => {
     const updated = [...rows];
     updated[index][field] =
-      field === "quantity" || field === "rate" ? parseFloat(value) : value;
+      field === "quantity" || field === "rate"
+        ? value === "" ? "" : parseFloat(value)
+        : value;
     setRows(updated);
   };
+  
 
   const addRow = () => {
     setRows([
       ...rows,
-      { date: "", challan: "", voltage: "", quantity: 0, rate: 0, remark: "" },
+      { date: "", challan: "", voltage: "", quantity: "", rate: "", remark: "" },
     ]);
   };
 
   const totalQuantity = rows
-    .reduce((sum, row) => sum + row.quantity, 0)
+    .reduce((sum, row) => sum + (parseFloat(row.quantity) || 0), 0)
     .toFixed(2);
-  const totalAmount = rows
-    .reduce((sum, row) => sum + row.quantity * row.rate, 0)
+
+    const totalAmount = rows
+    .reduce(
+      (sum, row) =>
+        sum + (parseFloat(row.quantity) || 0) * (parseFloat(row.rate) || 0),
+      0
+    )
     .toFixed(2);
+  
 
   const buildPDF = () => {
     const doc = new jsPDF();
